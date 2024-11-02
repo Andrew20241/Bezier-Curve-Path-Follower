@@ -1,16 +1,28 @@
+"""Libraries need for Code"""
 from vex import * 
 import math 
 
+"""Defines the objects for the Controller and Brain for VEX Robot"""
 controller_1 = Controller(ControllerType.PRIMARY)
 brain = Brain() 
 
 #############################        Pneumatics       #####################################
 
 class better_pneumatic:
+    """This code is aimed toward making the Pneumatics more easier to implement without worrying about states.
+
+    Methods: Constructor and Toggle
+    """
     def __init__(self, Pneumatic_obj):
         self.p = Pneumatic_obj
         
     def toggle(self):
+        """Toggles the pneumatics to the opposite state in which it is in
+        
+        Args: None
+
+        Returns: None
+        """
         if self.p.value() == True: 
             self.p.close() 
         elif self.p.value() == False: 
@@ -21,18 +33,40 @@ class better_pneumatic:
 #############################        Generation       #####################################
 
 class Point:
+    """Defines a Point in x and y coordinate space."""
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
 class Curve_Generator: 
+    """Generates Bezier Curve based on given point."""
     def __init__(self):
         self = self
 
     def distance_formula(self, x1, x2, y1, y2): 
+        """Distance forumla Method calculator.
+        
+        Args: 
+            x1: first point X coordinate
+            x2: second point X coordinate
+            y1: first point Y coordinate
+            y2: second point Y coordinate
+
+        Returns:
+            double: distance between points
+        """
         return math.sqrt(((x2 - x1)**2) + ((y2 - y1)**2))
 
     def generator(self, point): 
+        """Given a list of points, it will generate a Bezier Curve.
+
+        Args: 
+            point: list of points from user input
+
+        Returns:
+            list: list of new points that are the defined path of the Bezier Curve
+        """
         P1 = point[0]
         P2 = point[1]
         P3 = point[2]
@@ -63,6 +97,8 @@ class Curve_Generator:
 #############################        Drivetrain       #####################################
 
 class better_drivetrain: 
+    """Drivetrain class that contains methods to move the robot."""
+
     def __init__(self, left, right, inert, gen, gear_ratio, wheel_p):
         self.left = left
         self.right = right                
@@ -76,6 +112,12 @@ class better_drivetrain:
         self.wheel_p = wheel_p
 
     def motor_setting(self, bool_reset, type):
+        """Sets the motor type
+        
+        Args:
+            bool_reset: reset encoder
+            type: setting the motor type
+        """
         if bool_reset == True: 
             for i in self.left:
                 i.reset_position()
@@ -94,12 +136,24 @@ class better_drivetrain:
                 i.set_stopping(BRAKE)
 
     def move_rpm(self, left_val, right_val): 
+        """Moving the robot using RPM values.
+
+        Args: 
+            left_val: RPM for left side of drivetrain
+            right_val: RPM for right side of drivetrain
+        """
         for i in self.left: 
             i.spin(FORWARD, left_val, RPM)
         for i in self.right: 
             i.spin(FORWARD, right_val, RPM)
 
     def move_pct(self, left_val, right_val): 
+        """Moving the robot using Percent values.
+
+        Args: 
+            left_val: PCT for left side of drivetrain
+            right_val: PCT for right side of drivetrain
+        """
         for i in self.left: 
             i.spin(FORWARD, left_val, PERCENT)
         for i in self.right: 
@@ -107,12 +161,20 @@ class better_drivetrain:
 
 
     def control(self, forward, turn, t): 
+        """Control value to allow for greater control in high and low speeds.
+        
+        Args: 
+            forward: throttle value
+            turn: turn value
+            t: constant for how much control
+        """
         forward = (math.exp(((abs(forward) - 127)*t)/1000) * forward)/127
         turn = (math.exp(((abs(turn) - 127)*t)/1000) * turn)/127
         
         self.move_pct((forward + turn), (forward - turn))   
 
     def user_control(self): 
+        """User controls."""
         while True: 
             self.control(controller_1.axis2.value(), controller_1.axis4.value(), 15)
 
@@ -122,7 +184,13 @@ class better_drivetrain:
             controller_1.screen.set_cursor(1, 1)
 
     def drive(self, org_path, own_scale_factor, own_curverature): 
+        """Follows the path given by input.
 
+        Args: 
+            org_path: original by user
+            own_scale_factor: how much to speed up the velocities
+            own_curverature: how much curve should the robot drive
+        """
         track_width = 0.875   
         max_velocity_rpm = 200
 
@@ -184,7 +252,12 @@ class better_drivetrain:
 
         controller_1.screen.clear_screen()
 
-    def turn(self, angle): 
+    def turn(self, angle):
+        """Accurate turning method for drivetrain/
+
+        Args: 
+            angle: amount of degree wanting to turn relative to the robot current heading
+        """
         while True: 
             minAngle = angle - self.inert.rotation() 
 
