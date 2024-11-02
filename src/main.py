@@ -1,3 +1,7 @@
+"""
+@author Andrew Son, 5430D Parkway West High School Robotics team
+"""
+
 """Libraries need for Code"""
 from vex import * 
 import math 
